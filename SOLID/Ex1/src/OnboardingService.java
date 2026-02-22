@@ -9,20 +9,38 @@ public class OnboardingService {
     public void registerFromRawInput(String raw) {
         System.out.println("INPUT: " + raw);
 
-        Map<String,String> kv = new LinkedHashMap<>();
-        String[] parts = raw.split(";");
-        for (String p : parts) {
-            String[] t = p.split("=", 2);
-            if (t.length == 2) kv.put(t[0].trim(), t[1].trim());
-        }
+        var kv=parseRawInput(raw);
 
         String name = kv.getOrDefault("name", "");
         String email = kv.getOrDefault("email", "");
         String phone = kv.getOrDefault("phone", "");
         String program = kv.getOrDefault("program", "");
 
-        // validation inline, printing inline
+        var isValid=validateInput(name, email, phone, program);
+
+        if (isValid) {
+            String id = IdUtil.nextStudentId(db.count());
+            StudentRecord rec = new StudentRecord(id, name, email, phone, program);
+
+            db.save(rec);
+
+            logger(id, rec);
+        }
+    }
+
+    public Map<String, String> parseRawInput(String raw) {
+        Map<String,String> kv = new LinkedHashMap<>();
+        String[] parts = raw.split(";");
+        for (String p : parts) {
+            String[] t = p.split("=", 2);
+            if (t.length == 2) kv.put(t[0].trim(), t[1].trim());
+        }
+        return kv;
+    }
+
+    public boolean validateInput(String name, String email, String phone, String program) {
         List<String> errors = new ArrayList<>();
+
         if (name.isBlank()) errors.add("name is required");
         if (email.isBlank() || !email.contains("@")) errors.add("email is invalid");
         if (phone.isBlank() || !phone.chars().allMatch(Character::isDigit)) errors.add("phone is invalid");
@@ -31,14 +49,12 @@ public class OnboardingService {
         if (!errors.isEmpty()) {
             System.out.println("ERROR: cannot register");
             for (String e : errors) System.out.println("- " + e);
-            return;
+            return false;
         }
+        return true;
+    }
 
-        String id = IdUtil.nextStudentId(db.count());
-        StudentRecord rec = new StudentRecord(id, name, email, phone, program);
-
-        db.save(rec);
-
+    public void logger(String id, StudentRecord rec) {
         System.out.println("OK: created student " + id);
         System.out.println("Saved. Total students: " + db.count());
         System.out.println("CONFIRMATION:");
