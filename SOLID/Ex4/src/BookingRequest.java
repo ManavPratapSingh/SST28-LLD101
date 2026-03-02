@@ -1,11 +1,11 @@
 import java.util.*;
 
 public class BookingRequest {
-    public final int roomType;
-    public final List<AddOn> addOns;
+    public final ILegacyRoom room;
+    public final List<IAddOn> addOns;
 
-    public BookingRequest(int roomType, List<AddOn> addOns) {
-        this.roomType = roomType;
+    public BookingRequest(ILegacyRoom room, List<IAddOn> addOns) {
+        this.room = room;
         this.addOns = addOns;
     }
 }
