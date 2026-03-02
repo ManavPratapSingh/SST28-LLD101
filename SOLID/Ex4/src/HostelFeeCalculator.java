@@ -2,46 +2,36 @@ import java.util.*;
 
 public class HostelFeeCalculator {
     private final FakeBookingRepo repo;
-    private final List<RoomPricing> roomRules;
-    private final List<AddOnPricing> addOnRules;
 
-    public HostelFeeCalculator(FakeBookingRepo repo,
-            List<RoomPricing> roomRules,
-            List<AddOnPricing> addOnRules) {
-        this.repo = repo;
-        this.roomRules = roomRules;
-        this.addOnRules = addOnRules;
-    }
+    public HostelFeeCalculator(FakeBookingRepo repo) { this.repo = repo; }
 
+    // OCP violation: switch + add-on branching + printing + persistence.
     public void process(BookingRequest req) {
         Money monthly = calculateMonthly(req);
         Money deposit = new Money(5000.00);
 
         ReceiptPrinter.print(req, monthly, deposit);
 
-        String bookingId = "H-" + (7000 + new Random(1).nextInt(1000));
+        String bookingId = "H-" + (7000 + new Random(1).nextInt(1000)); // deterministic-ish
         repo.save(bookingId, req, monthly, deposit);
     }
 
     private Money calculateMonthly(BookingRequest req) {
-        Money base = new Money(0.0);
-        for (RoomPricing rule : roomRules) {
-            if (rule.matches(req.roomType)) {
-                base = rule.getBasePrice();
-                break;
-            }
+        double base;
+        switch (req.roomType) {
+            case LegacyRoomTypes.SINGLE -> base = 14000.0;
+            case LegacyRoomTypes.DOUBLE -> base = 15000.0;
+            case LegacyRoomTypes.TRIPLE -> base = 12000.0;
+            default -> base = 16000.0;
         }
 
-        Money add = new Money(0.0);
+        double add = 0.0;
         for (AddOn a : req.addOns) {
-            for (AddOnPricing rule : addOnRules) {
-                if (rule.matches(a)) {
-                    add = add.plus(rule.getPrice());
-                    break;
-                }
-            }
+            if (a == AddOn.MESS) add += 1000.0;
+            else if (a == AddOn.LAUNDRY) add += 500.0;
+            else if (a == AddOn.GYM) add += 300.0;
         }
 
-        return base.plus(add);
+        return new Money(base + add);
     }
 }
