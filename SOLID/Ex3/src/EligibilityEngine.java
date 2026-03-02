@@ -1,11 +1,11 @@
 import java.util.*;
 
 public class EligibilityEngine {
-    private final FakeEligibilityStore store;
+    private final IDBRepository repository;
     private final Validator validator;
 
-    public EligibilityEngine(FakeEligibilityStore store, Validator validator) {
-        this.store = store;
+    public EligibilityEngine(IDBRepository repository, Validator validator) {
+        this.repository = repository;
         this.validator = validator;
     }
 
@@ -13,7 +13,7 @@ public class EligibilityEngine {
         ReportPrinter p = new ReportPrinter();
         EligibilityEngineResult r = evaluate(s); // giant conditional inside
         p.print(s, r);
-        store.save(s.rollNo, r.status);
+        repository.save(s.rollNo, r.status);
     }
 
     public EligibilityEngineResult evaluate(StudentProfile s) {
