@@ -1,5 +1,5 @@
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args){
         System.out.println("=== Notification Demo ===");
         AuditLog audit = new AuditLog();
 
@@ -9,11 +9,12 @@ public class Main {
         NotificationSender sms = new SmsSender(audit);
         NotificationSender wa = new WhatsAppSender(audit);
 
-        email.send(n);
-        sms.send(n);
+
         try {
+            email.send(n);
+            sms.send(n);
             wa.send(n);
-        } catch (RuntimeException ex) {
+        } catch (Exception ex) {
             System.out.println("WA ERROR: " + ex.getMessage());
             audit.add("WA failed");
         }
