@@ -19,26 +19,29 @@ public class App {
         User faculty = new User("Prof. Noor", "FACULTY");
         User admin = new User("Kshitij", "ADMIN");
 
-        ReportFile publicReport = new ReportFile("R-101", "Orientation Plan", "PUBLIC");
-        ReportFile facultyReport = new ReportFile("R-202", "Midterm Review", "FACULTY");
-        ReportFile adminReport = new ReportFile("R-303", "Budget Audit", "ADMIN");
+        Report publicReport = new ReportProxy("R-101", "Orientation Plan", "PUBLIC");
+        Report facultyReport = new ReportProxy("R-202", "Midterm Review", "FACULTY");
+        Report adminReport = new ReportProxy("R-303", "Budget Audit", "ADMIN");
 
         ReportViewer viewer = new ReportViewer();
 
         System.out.println("=== CampusVault Demo ===");
 
-        viewer.open(publicReport, student);
+        System.out.println("Scenario 1: Unauthorized user being blocked");
+        viewer.open(adminReport, student);
         System.out.println();
 
-        viewer.open(facultyReport, student);
-        System.out.println();
-
+        System.out.println("Scenario 2: Report loading only upon the first authorized view");
         viewer.open(facultyReport, faculty);
         System.out.println();
 
-        viewer.open(adminReport, admin);
+        System.out.println("Scenario 3: Report displaying immediately (without reloading) on the second view");
+        viewer.open(facultyReport, faculty);
         System.out.println();
 
+        System.out.println("Scenario 4: Mixed access test");
+        viewer.open(publicReport, student);
+        System.out.println();
         viewer.open(adminReport, admin);
     }
 }
